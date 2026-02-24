@@ -47,3 +47,7 @@ Thumbs.db
 
 # Docker
 workspace/
+
+# LLM Agent metadata
+.claude/
+.cursor/
