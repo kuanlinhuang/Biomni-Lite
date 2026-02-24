@@ -17,6 +17,9 @@ COPY biomni/ ./biomni/
 # Install Python dependencies
 RUN pip install --no-cache-dir -e ".[all]"
 
+# Copy entrypoint script (after pip install to maximise layer cache reuse)
+COPY serve.py ./
+
 # Create workspace directory for data and outputs
 RUN mkdir -p /workspace/data
 
@@ -29,5 +32,5 @@ ENV BIOMNI_PATH="/workspace/data"
 
 WORKDIR /workspace
 
-# Default: verify installation
-CMD ["python", "-c", "from biomni.agent import A1; print('Biomni-Lite ready. Use A1() to start an agent.')"]
+# Default: verify installation and print usage hints
+CMD ["python", "-c", "from biomni.agent import A1; from biomni.agent.ad1 import AD1; print('Biomni-Lite ready.\\n  General biomedical : A1()\\n  Alzheimer\\'s Disease: AD1()\\nExample: A1().go(\\'your query\\')  |  AD1().go(\\'your query\\')')"]

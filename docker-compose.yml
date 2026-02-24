@@ -9,6 +9,7 @@ services:
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - BIOMNI_PATH=/workspace/data
       - BIOMNI_LLM=${BIOMNI_LLM:-claude-opus-4-5}
+      - BIOMNI_AGENT=${BIOMNI_AGENT:-}
     volumes:
       # Persist downloaded data lake files and run outputs across container restarts
       - biomni_data:/workspace/data
@@ -29,6 +30,7 @@ services:
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - BIOMNI_PATH=/workspace/data
       - BIOMNI_LLM=${BIOMNI_LLM:-claude-opus-4-5}
+      - BIOMNI_AGENT=${BIOMNI_AGENT:-}
     volumes:
       - biomni_data:/workspace/data
       - ./workspace:/workspace/runs

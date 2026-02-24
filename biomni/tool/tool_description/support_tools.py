@@ -71,4 +71,24 @@ description = [
             }
         ],
     },
+    {
+        "description": "Download a Biomni-Lite data lake file from Zenodo on demand. Files are cached locally — if already downloaded, this returns immediately.",
+        "name": "download_data_lake_file",
+        "optional_parameters": [
+            {
+                "default": "./data/biomni_data/data_lake",
+                "description": "Local cache directory",
+                "name": "data_lake_path",
+                "type": "str",
+            }
+        ],
+        "required_parameters": [
+            {
+                "default": None,
+                "description": "The data lake file name, e.g. 'gwas_catalog.pkl', 'DisGeNET.parquet'",
+                "name": "filename",
+                "type": "str",
+            }
+        ],
+    },
 ]

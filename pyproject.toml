@@ -23,6 +23,12 @@ dependencies = [
     "requests",
     "pandas",
     "tqdm",
+    "biopython",
+    "beautifulsoup4",
+    "googlesearch-python",
+    "PyPDF2",
+    "numpy",
+    "matplotlib",
 ]
 
 [project.urls]

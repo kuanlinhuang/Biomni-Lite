@@ -5,7 +5,8 @@ import re
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Literal, TypedDict
+from typing import Annotated, Any, Literal, TypedDict
+from langgraph.graph.message import add_messages
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -48,7 +49,7 @@ if os.path.exists(".env"):
 
 
 class AgentState(TypedDict):
-    messages: list[BaseMessage]
+    messages: Annotated[list[BaseMessage], add_messages]
     next_step: str | None
 
 
@@ -1275,9 +1276,9 @@ Each library is listed with its description to help you understand its functiona
         tool_desc = {i: [x for x in j if x["name"] != "run_python_repl"] for i, j in self.module2api.items()}
 
         # Prepare data lake items with descriptions
+        # In Biomni-Lite, we show ALL available datasets from Zenodo so the agent knows what's available
         data_lake_with_desc = []
-        for item in data_lake_items:
-            description = self.data_lake_dict.get(item, f"Data lake item: {item}")
+        for item, description in self.data_lake_dict.items():
             data_lake_with_desc.append({"name": item, "description": description})
 
         # Add custom data items if they exist
@@ -1604,10 +1605,10 @@ Each library is listed with its description to help you understand its functiona
         workflow.add_edge("execute", "generate")
         workflow.add_edge(START, "generate")
 
-        # Compile the workflow
-        self.app = workflow.compile()
-        self.checkpointer = MemorySaver()
-        self.app.checkpointer = self.checkpointer
+        # Compile the workflow with memory checkpointer
+        memory = MemorySaver()
+        self.app = workflow.compile(checkpointer=memory)
+        self.checkpointer = memory
         # display(Image(self.app.get_graph().draw_mermaid_png()))
 
     def _prepare_resources_for_retrieval(self, prompt):
@@ -1627,14 +1628,9 @@ Each library is listed with its description to help you understand its functiona
         all_tools = self.tool_registry.tools if hasattr(self, "tool_registry") else []
 
         # 2. Data lake items with descriptions
-        data_lake_path = self.path + "/data_lake"
-        data_lake_content = glob.glob(data_lake_path + "/*")
-        data_lake_items = [x.split("/")[-1] for x in data_lake_content]
-
-        # Create data lake descriptions for retrieval
+        # In Biomni-Lite, we retrieve from ALL available datasets in Zenodo
         data_lake_descriptions = []
-        for item in data_lake_items:
-            description = self.data_lake_dict.get(item, f"Data lake item: {item}")
+        for item, description in self.data_lake_dict.items():
             data_lake_descriptions.append({"name": item, "description": description})
 
         # Add custom data items to retrieval if they exist
@@ -2595,6 +2591,10 @@ Each library is listed with its description to help you understand its functiona
 
             return wrapper
 
+    def launch(self, **kwargs):
+        """Alias for launch_gradio_demo()."""
+        return self.launch_gradio_demo(**kwargs)
+
     def launch_gradio_demo(self, thread_id=42, share=False, server_name="0.0.0.0", require_verification=False):
         """Launch a full-featured Gradio UI for the A1 agent (adapted from codeact_copilot).
 
@@ -2626,7 +2626,7 @@ Each library is listed with its description to help you understand its functiona
         available_access_codes = ["Biomni2025"]
 
         # Function for verification page
-        def verify_access_code(code):
+        def verify_access_code(code=""):
             if code in available_access_codes:
                 return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
             else:
@@ -2926,6 +2926,11 @@ Each library is listed with its description to help you understand its functiona
                 access_error_msg = gr.Markdown(visible=False)
                 verify_btn = gr.Button("Verify Access")
                 verify_btn.click(
+                    fn=verify_access_code,
+                    inputs=[access_code_input],
+                    outputs=[verification_container, main_interface_container, access_error_msg],
+                )
+                access_code_input.submit(
                     fn=verify_access_code,
                     inputs=[access_code_input],
                     outputs=[verification_container, main_interface_container, access_error_msg],
