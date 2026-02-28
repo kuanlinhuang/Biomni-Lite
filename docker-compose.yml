@@ -39,7 +39,7 @@ services:
       - biomni_data:/workspace/data
       - ./workspace:/workspace/runs
     ports:
-      - "7860:7860"
+      - "${GRADIO_PORT:-7860}:7860"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860/"]
