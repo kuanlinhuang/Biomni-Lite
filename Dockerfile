@@ -17,6 +17,9 @@ COPY biomni/ ./biomni/
 # Install Python dependencies
 RUN pip install --no-cache-dir -e ".[all]"
 
+# Pre-cache Gradio assets at build time so nothing is fetched at runtime
+RUN python -c "import gradio; print(f'Gradio {gradio.__version__} assets cached')"
+
 # Copy entrypoint script (after pip install to maximise layer cache reuse)
 COPY serve.py ./
 
@@ -24,6 +27,9 @@ COPY serve.py ./
 RUN mkdir -p /workspace/data
 
 # Environment variables (override at runtime)
+ENV GRADIO_ANALYTICS_ENABLED="False"
+ENV GRADIO_SERVER_NAME="0.0.0.0"
+ENV PYTHONUNBUFFERED=1
 ENV ANTHROPIC_API_KEY=""
 ENV OPENAI_API_KEY=""
 ENV GEMINI_API_KEY=""

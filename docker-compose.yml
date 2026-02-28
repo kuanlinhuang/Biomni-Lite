@@ -10,6 +10,8 @@ services:
       - BIOMNI_PATH=/workspace/data
       - BIOMNI_LLM=${BIOMNI_LLM:-claude-opus-4-5}
       - BIOMNI_AGENT=${BIOMNI_AGENT:-}
+      - GRADIO_ANALYTICS_ENABLED=False
+      - PYTHONUNBUFFERED=1
     volumes:
       # Persist downloaded data lake files and run outputs across container restarts
       - biomni_data:/workspace/data
@@ -31,11 +33,20 @@ services:
       - BIOMNI_PATH=/workspace/data
       - BIOMNI_LLM=${BIOMNI_LLM:-claude-opus-4-5}
       - BIOMNI_AGENT=${BIOMNI_AGENT:-}
+      - GRADIO_ANALYTICS_ENABLED=False
+      - PYTHONUNBUFFERED=1
     volumes:
       - biomni_data:/workspace/data
       - ./workspace:/workspace/runs
     ports:
       - "7860:7860"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   biomni_data:
