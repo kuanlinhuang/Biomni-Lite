@@ -23,6 +23,11 @@ CLI usage (no Gradio):
 import os
 import threading
 
+# Disable Gradio analytics and set server binding before any Gradio import so
+# that no external CDN calls are made at startup (required for air-gapped VMs).
+os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
+os.environ.setdefault("GRADIO_SERVER_NAME", "0.0.0.0")
+
 
 def main() -> None:
     llm = os.getenv("BIOMNI_LLM", "claude-opus-4-5")
@@ -79,6 +84,8 @@ def main() -> None:
         server_name="0.0.0.0",
         server_port=7860,
         prevent_thread_lock=True,
+        share=False,
+        show_api=False,
     )
 
     # Block until the user clicks a button
