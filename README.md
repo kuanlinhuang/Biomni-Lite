@@ -112,13 +112,62 @@ AD1().go('Summarize the latest Alzheimer GWAS meta-analysis results')
 ### 4. Deploy on a VM
 
 ```bash
-# On any VM with Docker:
+# On any VM with Docker (requires internet access to pull the image):
 git clone <repo-url>
 cd Biomni-Lite
 echo "ANTHROPIC_API_KEY=your_key" > .env
 docker compose up biomni-lite-gradio -d
 # → Open http://<vm-ip>:7860
 ```
+
+### 5. Deploy on a Restricted-Internet / Air-gapped VM
+
+If your VM has **no or limited outbound internet access**, build the image on a
+connected machine, export it as a tarball, transfer it, and load it on the VM.
+
+**Step 1 – On an internet-connected machine** (once):
+
+```bash
+git clone <repo-url>
+cd Biomni-Lite
+bash scripts/save-image.sh          # builds image, writes biomni-lite.tar.gz
+```
+
+**Step 2 – Transfer the tarball to your VM** (e.g. via SCP or a USB drive):
+
+```bash
+scp biomni-lite.tar.gz user@<vm-ip>:~/Biomni-Lite/
+```
+
+**Step 3 – On the VM** (no internet required after this point):
+
+```bash
+cd ~/Biomni-Lite
+bash scripts/load-and-run.sh        # loads image, prompts for .env, starts UI
+# → Open http://<vm-ip>:7860
+```
+
+The helper script will:
+- Load the image from the tarball (skips if already loaded)
+- Create `.env` from `.env.example` if it does not exist and prompt you to fill in your API key
+- Create the `workspace/` directory for run outputs
+- Start `biomni-lite-gradio` in the background via `docker compose up -d`
+
+**Change the host port** (e.g. if 7860 is blocked on your VM):
+
+```bash
+GRADIO_PORT=8080 docker compose up biomni-lite-gradio -d
+# or set GRADIO_PORT=8080 in your .env file
+```
+
+**Useful commands on the VM:**
+
+```bash
+docker compose logs -f biomni-lite-gradio   # tail live logs
+docker compose down                          # stop the service
+docker compose up biomni-lite-gradio -d      # restart
+```
+
 
 ## Configuration
 
@@ -132,6 +181,7 @@ All settings can be set via environment variables or constructor arguments:
 | `BIOMNI_PATH` | `./data` | Working directory |
 | `BIOMNI_TIMEOUT_SECONDS` | `600` | Code execution timeout |
 | `BIOMNI_AGENT` | _(selector)_ | Agent for Gradio UI: `a1` or `ad1` |
+| `GRADIO_PORT` | `7860` | Host port for the Gradio web UI |
 
 ```python
 agent = A1(
