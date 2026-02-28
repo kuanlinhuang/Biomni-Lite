@@ -27,6 +27,8 @@ workspace/
 *.tsv
 *.h5
 *.h5ad
+*tar
+*tar.gz
 
 # OS
 .DS_Store

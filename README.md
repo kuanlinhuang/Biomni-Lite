@@ -168,6 +168,25 @@ docker compose down                          # stop the service
 docker compose up biomni-lite-gradio -d      # restart
 ```
 
+### 6. Troubleshooting VPN / Corporate Networks
+
+If you see **SSL errors** (`UNEXPECTED_EOF_WHILE_READING`) or
+**connection refused** errors, your corporate VPN/firewall is likely
+doing SSL inspection.
+
+**Quick fix** — add these to your `.env`:
+
+```bash
+# Skip the selector page (avoids a server restart that can cause connection errors):
+BIOMNI_AGENT=ad1
+
+# If your organization provides a CA bundle for SSL inspection:
+SSL_CERT_FILE=/path/to/corporate-ca-bundle.crt
+REQUESTS_CA_BUNDLE=/path/to/corporate-ca-bundle.crt
+```
+
+Then restart: `docker compose down && docker compose up biomni-lite-gradio -d`
+
 
 ## Configuration
 
@@ -181,7 +200,9 @@ All settings can be set via environment variables or constructor arguments:
 | `BIOMNI_PATH` | `./data` | Working directory |
 | `BIOMNI_TIMEOUT_SECONDS` | `600` | Code execution timeout |
 | `BIOMNI_AGENT` | _(selector)_ | Agent for Gradio UI: `a1` or `ad1` |
+| `BIOMNI_USE_TOOL_RETRIEVER` | `false` (Docker) | Smart tool selection (extra LLM call per query) |
 | `GRADIO_PORT` | `7860` | Host port for the Gradio web UI |
+| `SSL_CERT_FILE` | — | Path to CA bundle for VPN/corporate SSL inspection |
 
 ```python
 agent = A1(

@@ -56,14 +56,27 @@ mkdir -p "${REPO_ROOT}/workspace"
 source "${ENV_FILE}" 2>/dev/null || true
 
 PORT="${GRADIO_PORT:-7860}"
+AGENT="${BIOMNI_AGENT:-}"
+
 echo ""
 echo "==> Starting Biomni-Lite Gradio UI on port ${PORT} ..."
+
+# Recommend direct agent launch for VPN / remote VM deployments to avoid
+# the selector page transition (which requires a browser reload).
+if [[ -z "${AGENT}" ]]; then
+    echo ""
+    echo "TIP: For smoother operation on remote VMs / VPN, set BIOMNI_AGENT in .env:"
+    echo "  BIOMNI_AGENT=a1   (general biomedical agent)"
+    echo "  BIOMNI_AGENT=ad1  (Alzheimer's Disease agent)"
+    echo ""
+fi
+
 cd "${REPO_ROOT}"
 docker compose up biomni-lite-gradio -d
 
 echo ""
 echo "Biomni-Lite is running!"
-echo "Open http://$(hostname -I | awk '{print $1}'):${PORT} in your browser."
+echo "Open http://$(hostname -I 2>/dev/null | awk '{print $1}'):${PORT} in your browser."
 echo ""
 echo "To view logs : docker compose logs -f biomni-lite-gradio"
 echo "To stop      : docker compose down"

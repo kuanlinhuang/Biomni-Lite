@@ -730,11 +730,11 @@ class AD1(A1):
                 print("User liked the response")
 
         # Custom CSS - Simple & Professional
+        # NOTE: No external @import (e.g. Google Fonts) so the UI works on
+        # air-gapped / VPN-restricted networks without console errors.
         custom_css = """
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-        
         body, .gradio-container {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
             background-color: #ffffff !important;
         }
         
